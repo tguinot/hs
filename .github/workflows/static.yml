@@ -1,0 +1,81 @@
+name: Publish Javadoc to GitHub Pages
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build and run tests
+        run: mvn -B clean verify
+
+      - name: Generate module Javadocs
+        run: |
+          mvn -B -pl probabilistic-random-gen javadoc:javadoc
+          mvn -B -pl event-bus javadoc:javadoc
+          mvn -B -pl throttler javadoc:javadoc
+          mvn -B -pl window javadoc:javadoc
+
+      - name: Assemble Pages artifact
+        run: |
+          mkdir -p public
+          cp -R probabilistic-random-gen/target/site/apidocs public/probabilistic-random-gen
+          cp -R event-bus/target/site/apidocs           public/event-bus
+          cp -R throttler/target/site/apidocs           public/throttler
+          cp -R window/target/site/apidocs              public/window
+
+          cat <<'EOF' > public/index.html
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8"/>
+            <title>HSBC JavaDoc</title>
+          </head>
+          <body>
+            <h1>API Reference</h1>
+            <ul>
+              <li><a href="probabilistic-random-gen/index.html">Probabilistic Random Generator</a></li>
+              <li><a href="event-bus/index.html">Event Bus</a></li>
+              <li><a href="throttler/index.html">Sliding Window Throttler</a></li>
+              <li><a href="window/index.html">Sliding Window Statistics</a></li>
+            </ul>
+          </body>
+          </html>
+          EOF
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

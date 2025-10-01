@@ -155,19 +155,6 @@ orderSub.unsubscribe();
 eventBus.close();
 ```
 
-#### Best Practices
-- **Single-thread discipline:** publish, subscribe, and unsubscribe from the same thread.
-- **Avoid manual list mutation:** let the bus manage subscriber lists to prevent `ConcurrentModificationException`.
-- **Use try-with-resources:** take advantage of `AutoCloseable` for deterministic cleanup.
-- **Inspect metrics in tests:** call `getDetailedMetrics()` to verify event flow during testing.
-
-#### Key API Highlights
-- `addSubscriber(Class<E>, Consumer<E>)` — register a handler.
-- `addSubscriberForFilteredEvents(Class<E>, Predicate<E>, Consumer<E>)` — register with filtering.
-- `publishEvent(E event)` — dispatch an event; throws `NullPointerException` on `null`.
-- `getSubscriberCount(Class<?>)` / `getTotalSubscriberCount()` — inspect active subscriptions.
-- `close()` — releases all subscribers and resets metrics.
-
 Keep interactions confined to a single thread and `ThreadUnsafeEventBus` delivers minimal-overhead event routing with familiar APIs.
 
 
@@ -200,18 +187,6 @@ for (int i = 0; i < 10; i++) {
 pool.shutdown();
 eventBus.close();
 ```
-
-#### Best Practices
-- **Avoid long-running handlers:** callbacks execute on the publishing thread; offload heavy work if needed.
-- **Use filters for hot topics:** reduce per-event work with `addSubscriberForFilteredEvents`.
-- **Combine with `AutoCloseable`:** close the bus during shutdown to flush subscribers and log metrics.
-
-#### Key API Highlights
-- `addSubscriber(Class<E>, Consumer<E>)` / `addSubscriberForFilteredEvents(...)` — thread-safe registration.
-- `publishEvent(E event)` — safe to call from any thread.
-- `getEventClassesWithSubscribers()` — view registered event types.
-- `getDetailedMetrics()` — synchronized snapshot with per-class subscriber counts.
-- `close()` — removes subscribers and resets state while preventing further use.
 
 Use `ThreadSafeEventBus` whenever concurrency is a requirement; it provides safe, predictable event delivery without manual locking.
 
@@ -247,20 +222,6 @@ eventBus.publishEvent(new Quote("AAPL", 190.15, 102));
 eventBus.flushCoalescedEvents();
 eventBus.close();
 ```
-
-### Best Practices
-- **Choose stable keys:** use identifiers like `(symbol, priceLevel, side)` to prevent unintended overwrites.
-- **Flush strategically:** call `flushCoalescedEvents()` during idle windows or before shutdown to deliver pending data.
-- **Handle null keys intentionally:** returning `null` from the extractor bypasses coalescing for critical events.
-- **Combine with async delivery cautiously:** when using an executor, ensure subscribers are thread-safe.
-
-### Key API Highlights
-- `addCoalescingSubscriber(Class<E>, Function<E, K>, Consumer<E>)` — register coalescing handlers.
-- `addCoalescingSubscriber(..., Predicate<E>, Consumer<E>)` — add filtering before coalescing.
-- `configureCoalescing(Class<E>, Function<E, K>)` — enable global coalescing for an event type.
-- `flushCoalescedEvents()` / `flushCoalescedEvents(Class<E>)` — push pending updates immediately.
-- `getPendingCoalescedEventCount()` — inspect backlog size (optionally per class).
-- `getDetailedMetrics()` — includes coalescing counters alongside base metrics.
 
 Select `CoalescingThreadSafeEventBus` when you need thread safety plus intelligent conflation to keep subscribers focused on the latest state.
 
@@ -311,9 +272,6 @@ throttler.shutdown();
 - `notifyWhenCanProceed(Runnable)` queues callbacks and schedules `checkAndNotifyWaiters()` when capacity returns.
 - `shutdown()` cancels scheduled tasks and closes owned executors.
 
-### Best practices
-- **Keep callbacks lightweight** to avoid starving the callback executor.
-- **Handle shutdown paths** by guarding against `RejectedExecutionException` after close.
 # Sliding Window Statistics
 
 ## Overview

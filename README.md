@@ -1,7 +1,7 @@
 
 # A. Probabilistic Random Generator
 
-📚 **[API Documentation](https://tguinot.github.io/hs/probabilistic-random-gen/com/hsbc/random/package-summary.html)**
+📚 **[API Documentation](https://tguinot.github.io/hs/probabilistic-random-gen/com/hsbc/random/package-summary.html)** | 📊 **[Coverage Report](https://tguinot.github.io/hs/probabilistic-random-gen-coverage/)**
 
 ## Overview
 Samples integers from probability distributions.
@@ -56,7 +56,7 @@ See [`Example.java`](probabilistic-random-gen/src/main/java/com/hsbc/random/exam
 
 # B. Event Bus
 
-📚 **[API Documentation](https://tguinot.github.io/hs/event-bus/com/hsbc/eventbus/package-summary.html)**
+📚 **[API Documentation](https://tguinot.github.io/hs/event-bus/com/hsbc/eventbus/package-summary.html)** | 📊 **[Coverage Report](https://tguinot.github.io/hs/event-bus-coverage/)**
 
 ## Overview
 Three EventBus implementations: single-threaded, multi-threaded, and coalescing.
@@ -118,7 +118,7 @@ Coalesces events by key so subscribers receive only the latest update. Ideal for
 
 # C. Sliding Window Throttler
 
-📚 **[API Documentation](https://tguinot.github.io/hs/throttler/com/hsbc/throttler/package-summary.html)**
+📚 **[API Documentation](https://tguinot.github.io/hs/throttler/com/hsbc/throttler/package-summary.html)** | 📊 **[Coverage Report](https://tguinot.github.io/hs/throttler-coverage/)**
 
 ## Overview
 Rate limiter enforcing maximum permits within a sliding time window.
@@ -151,7 +151,7 @@ See [`Example.java`](throttler/src/main/java/com/hsbc/throttler/examples/Example
 
 # D. Sliding Window Statistics
 
-📚 **[API Documentation](https://tguinot.github.io/hs/window/com/hsbc/window/package-summary.html)**
+📚 **[API Documentation](https://tguinot.github.io/hs/window/com/hsbc/window/package-summary.html)** | 📊 **[Coverage Report](https://tguinot.github.io/hs/window-coverage/)**
 
 ## Overview
 Fixed-size FIFO window with descriptive statistics.

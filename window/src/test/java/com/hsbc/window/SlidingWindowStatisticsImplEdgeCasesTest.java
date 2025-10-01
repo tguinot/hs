@@ -211,7 +211,6 @@ class SlidingWindowStatisticsImplEdgeCasesTest {
 
             Statistics latest = stats.getLatestStatistics();
             assertEquals(-20.0, latest.getMean(), 0.001);
-            // All values have same frequency, mode returns smallest
             assertEquals(-30, latest.getMode());
         }
     }

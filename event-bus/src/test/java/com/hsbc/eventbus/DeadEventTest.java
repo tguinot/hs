@@ -57,12 +57,10 @@ class DeadEventTest {
     @DisplayName("Should implement equals correctly")
     void shouldImplementEqualsCorrectly() {
         String event1 = "test";
-        String event2 = "test";
         String event3 = "different";
         
-        // Create two dead events at the same time (approximately)
+        // Create dead events
         DeadEvent deadEvent1 = new DeadEvent(event1);
-        DeadEvent deadEvent2 = new DeadEvent(event2);
         DeadEvent deadEvent3 = new DeadEvent(event3);
         
         // Same instance
@@ -76,9 +74,6 @@ class DeadEventTest {
         
         // Different event
         assertThat(deadEvent1).isNotEqualTo(deadEvent3);
-        
-        // Note: deadEvent1 and deadEvent2 might not be equal due to different timestamps
-        // even though they wrap the same event
     }
     
     @Test

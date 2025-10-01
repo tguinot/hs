@@ -1,6 +1,5 @@
-Assignements
 
-# Probabilistic Random Generator
+# A. Probabilistic Random Generator
 
 ## Overview
 Robust Java library for sampling integers from deterministic probability distributions. Built with Maven, tested with JUnit 5 and AssertJ, and exercised through a rich example suite.
@@ -99,7 +98,7 @@ See [`Example.java`](probabilistic-random-gen/src/main/java/com/hsbc/random/exam
 
 
 
-# Event Bus
+# B. Event Bus
 
 ## Overview
 The module provides three in-process EventBus implementations covering single-threaded, multi-threaded, and coalescing workloads.
@@ -226,7 +225,7 @@ eventBus.close();
 Select `CoalescingThreadSafeEventBus` when you need thread safety plus intelligent conflation to keep subscribers focused on the latest state.
 
 
-# Sliding Window Throttler
+# C. Sliding Window Throttler
 
 ## Overview
 `SlidingWindowThrottler` is a production-quality rate limiter that enforces a maximum number of permits inside a moving time window. The implementation lives in `throttler/src/main/java/com/hsbc/throttler/SlidingWindowThrottler.java` and implements the `Throttler` contract.
@@ -272,7 +271,7 @@ throttler.shutdown();
 - `notifyWhenCanProceed(Runnable)` queues callbacks and schedules `checkAndNotifyWaiters()` when capacity returns.
 - `shutdown()` cancels scheduled tasks and closes owned executors.
 
-# Sliding Window Statistics
+# D. Sliding Window Statistics
 
 ## Overview
 `SlidingWindowStatisticsImpl` maintains a fixed-size FIFO of recent measurements and provides descriptive analytics via the `SlidingWindowStatistics` API.

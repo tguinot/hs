@@ -6,11 +6,10 @@ Robust Java library for sampling integers from deterministic probability distrib
 
 ## Highlights
 
-- **Clean contract**: `ProbabilisticRandomGen` exposes a single `nextFromSample()` method.
 - **Immutable data model**: `NumAndProbability` validates `float` probabilities (NaN, ∞, <0, >1 rejected) and exposes safe getters.
 - **Production-ready generator**: `WeightedRandomGenerator` pre-computes a cumulative distribution, filters zero-mass entries, and samples in O(log n) using `Arrays.binarySearch`.
+- **Constructor-based initialization**: All fields are `final` and initialized once in the constructor, enabling thread-safety without synchronization for concurrent reads.
 - **Edge-case coverage**: Tests verify rounding tolerance, duplicate numbers, tiny probabilities down to `Float.MIN_VALUE`, boundary random values, and large (1000 item) distributions.
-- **Examples included**: `Example` demonstrates weighted sampling, dice simulation, and statistical validation with deterministic seeds.
 
 
 ## Getting Started

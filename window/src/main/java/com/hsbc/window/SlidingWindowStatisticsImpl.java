@@ -135,8 +135,15 @@ public class SlidingWindowStatisticsImpl implements SlidingWindowStatistics, Aut
      * </ol>
      * <p>
      * The method is synchronized to ensure thread-safe access to the window.
-     * Subscriber notifications are executed asynchronously to prevent blocking.
+     * Subscriber notifications (both {@link StatisticsSubscriber#shouldNotify(Statistics)}
+     * and {@link StatisticsSubscriber#onStatisticsUpdate(Statistics)}) are executed
+     * asynchronously on a dedicated single-threaded executor. This ensures that:
      * </p>
+     * <ul>
+     *   <li>The add operation does not block waiting for subscribers</li>
+     *   <li>All subscriber callbacks occur on the same thread, regardless of which thread calls add</li>
+     *   <li>Subscribers do not need to be thread-safe</li>
+     * </ul>
      *
      * @param measurement the measurement value to add
      */
@@ -156,18 +163,20 @@ public class SlidingWindowStatisticsImpl implements SlidingWindowStatistics, Aut
         if (!subscribers.isEmpty() && !window.isEmpty()) {
             Statistics stats = computeStats();
             // Defensive copy to avoid ConcurrentModificationException
-            for (StatisticsSubscriber sub : new ArrayList<>(subscribers)) {
-                if (sub.shouldNotify(stats)) {
-                    callbackExecutor.execute(() -> {
-                        try {
+            List<StatisticsSubscriber> subscribersCopy = new ArrayList<>(subscribers);
+            // Execute all subscriber interactions on the executor thread to ensure thread safety
+            callbackExecutor.execute(() -> {
+                for (StatisticsSubscriber sub : subscribersCopy) {
+                    try {
+                        if (sub.shouldNotify(stats)) {
                             sub.onStatisticsUpdate(stats);
-                        } catch (Exception e) {
-                            System.err.println("Subscriber " + sub + " threw an exception: " + e.getMessage());
-                            e.printStackTrace(System.err);
                         }
-                    });
+                    } catch (Exception e) {
+                        System.err.println("Subscriber " + sub + " threw an exception: " + e.getMessage());
+                        e.printStackTrace(System.err);
+                    }
                 }
-            }
+            });
         }
     }
 
@@ -176,7 +185,8 @@ public class SlidingWindowStatisticsImpl implements SlidingWindowStatistics, Aut
      * <p>
      * The subscriber will be notified asynchronously whenever new measurements are added,
      * provided the subscriber's {@link StatisticsSubscriber#shouldNotify(Statistics)} method
-     * returns true.
+     * returns true. Both {@code shouldNotify} and {@code onStatisticsUpdate} are called
+     * on a dedicated single-threaded executor, so subscribers do not need to be thread-safe.
      * </p>
      *
      * @param subscriber the subscriber to register

@@ -38,12 +38,23 @@ jobs:
         run: |
           mkdir -p public
           for module in probabilistic-random-gen event-bus throttler window; do
-            SOURCE_DIR="$module/target/site/apidocs"
-            if [ ! -d "$SOURCE_DIR" ]; then
-              echo "Expected Javadoc output missing for $module at $SOURCE_DIR" >&2
+            # Copy Javadoc
+            JAVADOC_DIR="$module/target/site/apidocs"
+            if [ ! -d "$JAVADOC_DIR" ]; then
+              echo "Expected Javadoc output missing for $module at $JAVADOC_DIR" >&2
               exit 1
             fi
-            cp -R "$SOURCE_DIR" "public/$module"
+            cp -R "$JAVADOC_DIR" "public/$module"
+            
+            # Copy JaCoCo coverage reports
+            JACOCO_DIR="$module/target/site/jacoco"
+            if [ -d "$JACOCO_DIR" ]; then
+              mkdir -p "public/$module-coverage"
+              cp -R "$JACOCO_DIR"/* "public/$module-coverage/"
+              echo "✓ Copied coverage for $module"
+            else
+              echo "⚠ No coverage report found for $module at $JACOCO_DIR"
+            fi
           done
 
           cat <<'EOF' > public/index.html
@@ -51,16 +62,55 @@ jobs:
           <html lang="en">
           <head>
             <meta charset="utf-8"/>
-            <title>HSBC JavaDoc</title>
+            <title>HSBC Documentation</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+              h1 { color: #333; }
+              h2 { color: #666; margin-top: 30px; }
+              ul { list-style: none; padding: 0; }
+              li { margin: 10px 0; }
+              a { color: #0066cc; text-decoration: none; }
+              a:hover { text-decoration: underline; }
+              .module { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+              .links { display: flex; gap: 20px; }
+            </style>
           </head>
           <body>
-            <h1>API Reference</h1>
-            <ul>
-              <li><a href="probabilistic-random-gen/index.html">Probabilistic Random Generator</a></li>
-              <li><a href="event-bus/index.html">Event Bus</a></li>
-              <li><a href="throttler/index.html">Sliding Window Throttler</a></li>
-              <li><a href="window/index.html">Sliding Window Statistics</a></li>
-            </ul>
+            <h1>HSBC Sample Projects</h1>
+            
+            <h2>API Documentation & Coverage</h2>
+            
+            <div class="module">
+              <strong>Probabilistic Random Generator</strong>
+              <div class="links">
+                <a href="probabilistic-random-gen/index.html">📚 API Docs</a>
+                <a href="probabilistic-random-gen-coverage/index.html">📊 Coverage</a>
+              </div>
+            </div>
+            
+            <div class="module">
+              <strong>Event Bus</strong>
+              <div class="links">
+                <a href="event-bus/index.html">📚 API Docs</a>
+                <a href="event-bus-coverage/index.html">📊 Coverage</a>
+              </div>
+            </div>
+            
+            <div class="module">
+              <strong>Sliding Window Throttler</strong>
+              <div class="links">
+                <a href="throttler/index.html">📚 API Docs</a>
+                <a href="throttler-coverage/index.html">📊 Coverage</a>
+              </div>
+            </div>
+            
+            <div class="module">
+              <strong>Sliding Window Statistics</strong>
+              <div class="links">
+                <a href="window/index.html">📚 API Docs</a>
+                <a href="window-coverage/index.html">📊 Coverage</a>
+              </div>
+            </div>
           </body>
           </html>
           EOF

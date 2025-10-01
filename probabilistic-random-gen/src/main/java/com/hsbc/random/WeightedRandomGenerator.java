@@ -3,6 +3,7 @@ package com.hsbc.random;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 /**
@@ -14,6 +15,10 @@ import java.util.stream.Collectors;
  * setup (validation, creating the cumulative distribution) is performed once in the
  * constructor. This makes the `nextFromSample()` method highly efficient and guarantees
  * that every instance is always in a valid state.
+ * 
+ * **Thread Safety:**
+ * The default constructor uses ThreadLocalRandom for lock-free, thread-safe random number
+ * generation. Instances can be safely shared across threads without synchronization.
  */
 public class WeightedRandomGenerator implements ProbabilisticRandomGen {
     
@@ -22,22 +27,26 @@ public class WeightedRandomGenerator implements ProbabilisticRandomGen {
     private final int[] numbers;
     private final float[] cumulativeProbabilities;
     private final Random random;
+    private final boolean useThreadLocalRandom;
     
     /**
      * Creates a new WeightedRandomGenerator with the given number-probability pairs.
+     * Uses ThreadLocalRandom for thread-safe random number generation without synchronization.
      * 
      * @param numAndProbabilities list of numbers and their probabilities
      * @throws IllegalArgumentException if probabilities don't sum to approximately 1.0
      */
     public WeightedRandomGenerator(List<NumAndProbability> numAndProbabilities) {
-        this(numAndProbabilities, new Random());
+        this(numAndProbabilities, null);
     }
     
     /**
      * Creates a new WeightedRandomGenerator with the given number-probability pairs and random source.
+     * This constructor is primarily for testing with deterministic Random instances.
+     * For production use, prefer the single-argument constructor which uses ThreadLocalRandom.
      * 
      * @param numAndProbabilities list of numbers and their probabilities
-     * @param random the random number generator to use
+     * @param random the random number generator to use (null to use ThreadLocalRandom)
      * @throws IllegalArgumentException if probabilities don't sum to approximately 1.0
      */
     public WeightedRandomGenerator(List<NumAndProbability> numAndProbabilities, Random random) {
@@ -57,7 +66,8 @@ public class WeightedRandomGenerator implements ProbabilisticRandomGen {
         }
         
         // Step 3: Initialize internal arrays to store numbers and their cumulative probabilities
-        this.random = random;
+        this.useThreadLocalRandom = (random == null);
+        this.random = random;  // null if using ThreadLocalRandom
         this.numbers = new int[nonZeroProbabilities.size()];
         this.cumulativeProbabilities = new float[nonZeroProbabilities.size()];
         
@@ -120,7 +130,9 @@ public class WeightedRandomGenerator implements ProbabilisticRandomGen {
      */
     @Override
     public int nextFromSample() {
-        float randomValue = random.nextFloat();
+        float randomValue = useThreadLocalRandom 
+            ? ThreadLocalRandom.current().nextFloat()
+            : random.nextFloat();
         int index = Arrays.binarySearch(cumulativeProbabilities, randomValue);
         index = index >= 0 ? index + 1 : -index - 1;
         return numbers[Math.min(index, numbers.length - 1)];

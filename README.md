@@ -4,14 +4,14 @@
 📚 **[API Documentation](https://tguinot.github.io/hs/probabilistic-random-gen/com/hsbc/random/package-summary.html)**
 
 ## Overview
-Java library for sampling integers from deterministic probability distributions. Built with Maven.
+Samples integers from probability distributions.
 
 ## Highlights
 
-- **Immutable data model**: `NumAndProbability` validates `float` probabilities (NaN, ∞, <0, >1 rejected) and exposes safe getters.
-- **Production-ready generator**: `WeightedRandomGenerator` pre-computes a cumulative distribution, filters zero-mass entries, and samples in O(log n) using `Arrays.binarySearch`.
-- **Constructor-based initialization**: All fields are `final` and initialized once in the constructor, enabling thread-safety without synchronization for concurrent reads.
-- **Edge-case coverage**: Tests verify rounding tolerance, duplicate numbers, tiny probabilities down to `Float.MIN_VALUE`, boundary random values, and large (1000 item) distributions.
+- **Immutable data model**: `NumAndProbability` validates probabilities (rejects NaN, ∞, <0, >1).
+- **Weighted random generator**: `WeightedRandomGenerator` pre-computes cumulative distribution and samples in O(log n).
+- **Thread-safe**: Uses `ThreadLocalRandom` by default (lock-free, no synchronization).
+- **Constructor-based initialization**: All fields are `final` and initialized once in the constructor, making the class immutable.
 
 
 ## Getting Started
@@ -41,17 +41,17 @@ See [`Example.java`](probabilistic-random-gen/src/main/java/com/hsbc/random/exam
 
 - **Validation pipeline**
   - Rejects null/empty lists.
-  - Strips zero-probability entries (ensuring at least one positive weight remains).
-  - Enforces probabilities sum to 1.0 within `1e-6`, then normalises and clamps final cumulative entry to `1.0f`.
+  - Strips zero-probability entries.
+  - Enforces probabilities sum to 1.0 ± 1e-6, then normalizes.
 
-- **Sampling semantics**
-  - Random value drawn in `[0.0, 1.0)`.
-  - `Arrays.binarySearch` locates the first cumulative boundary greater than the draw; tie-breaking ensures right-open intervals `[a, b)` are respected.
-  - Duplicated numbers remain as separate buckets, allowing composite weights.
+- **Sampling**
+  - Draws random value in `[0.0, 1.0)`.
+  - Binary search finds matching cumulative boundary.
+  - Duplicate numbers supported (composite weights).
 
 - **Threading**
-  - `NumAndProbability` is immutable.
-  - `WeightedRandomGenerator` uses a mutable `Random`; prefer per-thread instances or external synchronisation when sharing.
+  - Fully thread-safe using `ThreadLocalRandom`.
+  - For testing, pass custom `Random` to two-argument constructor.
 
 
 # B. Event Bus
@@ -59,7 +59,7 @@ See [`Example.java`](probabilistic-random-gen/src/main/java/com/hsbc/random/exam
 📚 **[API Documentation](https://tguinot.github.io/hs/event-bus/com/hsbc/eventbus/package-summary.html)**
 
 ## Overview
-The module provides three in-process EventBus implementations covering single-threaded, multi-threaded, and coalescing workloads.
+Three EventBus implementations: single-threaded, multi-threaded, and coalescing.
 
 ## Highlights
 - **ThreadUnsafeEventBus** for lightweight single-threaded dispatch.
@@ -82,40 +82,38 @@ See [`Example.java`](event-bus/src/main/java/com/hsbc/eventbus/examples/Example.
 
 ### ThreadUnsafeEventBus
 
-A lightweight option optimized for single-threaded scenarios. `ThreadUnsafeEventBus` trades synchronization for throughput by using basic collections (`HashMap`, `ArrayList`). Only one thread should interact with the bus at a time or you must guard access externally.
-
-If multiple threads will publish or subscribe concurrently, prefer `ThreadSafeEventBus` instead.
+Optimized for single-threaded use with `HashMap` and `ArrayList`. No synchronization overhead. Use `ThreadSafeEventBus` for concurrent access.
 
 #### Core Characteristics
-- **Zero synchronization overhead:** relies on `HashMap` and `ArrayList` internally.
-- **Type-safe subscriptions:** register handlers for concrete event classes.
-- **Dead-event optionality:** emits `DeadEvent` when no subscribers handle an event (configurable via constructor).
-- **Lightweight metrics:** tracks total published events and dead-event count for diagnostics.
+- **Zero synchronization overhead:** uses `HashMap` and `ArrayList`.
+- **Type-safe subscriptions:** handlers registered per event class.
+- **Dead-event handling:** optional `DeadEvent` for unhandled events.
+- **Metrics:** tracks published events and dead-event count.
 
 
 ### ThreadSafeEventBus
 
-Designed for concurrent environments, `ThreadSafeEventBus` uses `ConcurrentHashMap`, `CopyOnWriteArrayList`, and `AtomicLong` to guarantee safe access from multiple threads without requiring external locks. Subscriber callbacks execute on the publishing thread, so you control execution context.
+Thread-safe using `ConcurrentHashMap`, `CopyOnWriteArrayList`, and `AtomicLong`. Callbacks execute on the publishing thread.
 
 
 #### Core Characteristics
-- **Full thread safety:** all public APIs support concurrent calls.
-- **Non-blocking collections:** `ConcurrentHashMap` registry with `CopyOnWriteArrayList` per event type.
-- **Atomic metrics:** publish counts and dead-event totals tracked with `AtomicLong`.
-- **Hierarchy-aware dispatch:** subscribers registered for supertypes/interfaces still receive subclass events.
+- **Thread-safe:** all APIs support concurrent calls.
+- **Non-blocking:** uses concurrent collections.
+- **Atomic metrics:** counts tracked with `AtomicLong`.
+- **Hierarchy-aware:** supertype subscribers receive subclass events.
 
 
 ### CoalescingThreadSafeEventBus
 
-Extends the thread-safe core with event coalescing, ensuring subscribers only see the most recent update for a given key. `CoalescingThreadSafeEventBus` is ideal for high-frequency feeds—such as market data—where intermediate states can be dropped safely.
+Coalesces events by key so subscribers receive only the latest update. Ideal for high-frequency feeds like market data.
 
 
 #### Core Characteristics
-- **Per-subscriber coalescing:** each handler can specify its own key extractor and optional filter.
-- **Global configuration:** enable coalescing for an entire event class via `configureCoalescing`.
-- **Null-key bypass:** events with `null` keys skip coalescing and are delivered immediately.
-- **Detailed metrics:** exposes counts for coalesced, replaced, and pending events.
-- **Async-friendly:** optional `ScheduledExecutorService` batches deliveries in background threads.
+- **Per-subscriber coalescing:** custom key extractor and filter per handler.
+- **Global configuration:** coalesce entire event classes.
+- **Null-key bypass:** immediate delivery for null keys.
+- **Metrics:** tracks coalesced, replaced, and pending events.
+- **Async support:** optional executor for batched delivery.
 
 
 # C. Sliding Window Throttler
@@ -123,13 +121,13 @@ Extends the thread-safe core with event coalescing, ensuring subscribers only se
 📚 **[API Documentation](https://tguinot.github.io/hs/throttler/com/hsbc/throttler/package-summary.html)**
 
 ## Overview
-`SlidingWindowThrottler` is a rate limiter that enforces a maximum number of permits inside a moving time window. The implementation lives in `throttler/src/main/java/com/hsbc/throttler/SlidingWindowThrottler.java` and implements the `Throttler` contract.
+Rate limiter enforcing maximum permits within a sliding time window.
 
 ## Highlights
-- **Sliding window enforcement**: Maintains recent timestamps and evicts expired entries before each decision.
-- **Synchronous gating**: `shouldProceed()` atomically consumes permits when capacity is available.
-- **Asynchronous callbacks**: `notifyWhenCanProceed(Runnable)` queues work and replays it once permits recycle.
-- **Pluggable infrastructure**: Optional `Clock`, `ScheduledExecutorService`, and callback `ExecutorService` make deterministic tests and integrations straightforward.
+- **Sliding window:** evicts expired timestamps before each check.
+- **Synchronous:** `shouldProceed()` atomically consumes permits.
+- **Asynchronous:** `notifyWhenCanProceed()` queues callbacks until permits available.
+- **Pluggable:** inject `Clock` and executors for testing.
 
 ## Getting Started
 ```bash
@@ -145,10 +143,10 @@ open throttler/target/site/jacoco/index.html
 
 See [`Example.java`](throttler/src/main/java/com/hsbc/throttler/examples/Example.java) for runnable samples.
 
-### Configuration notes
-- **Default executors**: The no-arg constructor provisions daemon scheduler and callback executors.
-- **Custom executors**: Supply your own scheduler/executor pair to integrate with container-managed pools or to bound concurrency.
-- **Deterministic testing**: Inject a fixed `Clock` to simulate time progression without sleeps.
+### Configuration
+- **Default:** daemon scheduler and callback executors.
+- **Custom:** provide your own executors.
+- **Testing:** inject fixed `Clock` for deterministic tests.
 
 
 # D. Sliding Window Statistics
@@ -156,13 +154,13 @@ See [`Example.java`](throttler/src/main/java/com/hsbc/throttler/examples/Example
 📚 **[API Documentation](https://tguinot.github.io/hs/window/com/hsbc/window/package-summary.html)**
 
 ## Overview
-`SlidingWindowStatisticsImpl` maintains a fixed-size FIFO of recent measurements and provides descriptive analytics via the `SlidingWindowStatistics` API.
+Fixed-size FIFO window with descriptive statistics.
 
 ## Highlights
-- **Comprehensive analytics**: Tracks mean, standard deviation, percentiles, kurtosis, skewness, and quantiles.
-- **Real-time updates**: `add(long measurement)` synchronizes access and evicts the oldest value once capacity is exceeded.
-- **Cached snapshots**: `getLatestStatistics()` uses memoization for O(1) reads between updates.
-- **Asynchronous subscribers**: `subscribeForStatistics(StatisticsSubscriber)` notifies listeners via a bounded single-thread executor.
+- **Analytics:** mean, std dev, percentiles, kurtosis, skewness, quantiles.
+- **Real-time:** synchronized `add()` evicts oldest when full.
+- **Cached:** `getLatestStatistics()` returns O(1) snapshot.
+- **Async subscribers:** notified via single-thread executor.
 
 ## Getting Started
 ```bash

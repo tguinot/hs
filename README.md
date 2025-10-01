@@ -80,7 +80,7 @@ open event-bus/target/site/jacoco/index.html
 
 See [`Example.java`](event-bus/src/main/java/com/hsbc/eventbus/examples/Example.java) for runnable samples.
 
-### ThreadUnsafeEventBus ([`Example.java`](event-bus/src/main/java/com/hsbc/eventbus/examples/Example.java))
+### ThreadUnsafeEventBus
 
 A lightweight option optimized for single-threaded scenarios. `ThreadUnsafeEventBus` trades synchronization for throughput by using basic collections (`HashMap`, `ArrayList`). Only one thread should interact with the bus at a time or you must guard access externally.
 

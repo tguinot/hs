@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * The "sliding window" is the time interval of size {@code period} immediately preceding the
  * current time.
  *
- * <h3>Algorithm</h3>
+ * <h2>Algorithm</h2>
  * The throttler tracks the timestamps of the last {@code maxPermits} requests in a queue.
  * When a new request arrives:
  * <ol>

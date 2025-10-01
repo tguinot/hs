@@ -4,7 +4,7 @@
 📚 **[API Documentation](https://tguinot.github.io/hs/probabilistic-random-gen/com/hsbc/random/package-summary.html)**
 
 ## Overview
-Robust Java library for sampling integers from deterministic probability distributions. Built with Maven, tested with JUnit 5 and AssertJ, and exercised through a rich example suite.
+Java library for sampling integers from deterministic probability distributions. Built with Maven.
 
 ## Highlights
 
@@ -18,9 +18,7 @@ Robust Java library for sampling integers from deterministic probability distrib
 
 - **Build & verify (run from repository root)**
   ```bash
-  mvn clean compile
-  mvn test
-  mvn package
+  mvn clean verify
   ```
 
 - **Run the demo**
@@ -37,24 +35,6 @@ Robust Java library for sampling integers from deterministic probability distrib
 ## Usage
 
 See [`Example.java`](probabilistic-random-gen/src/main/java/com/hsbc/random/examples/Example.java) for runnable samples.
-
-- **Create a generator**
-  ```java
-  List<ProbabilisticRandomGen.NumAndProbability> distribution = List.of(
-      new ProbabilisticRandomGen.NumAndProbability(1, 0.10f),
-      new ProbabilisticRandomGen.NumAndProbability(2, 0.30f),
-      new ProbabilisticRandomGen.NumAndProbability(3, 0.60f)
-  );
-
-  ProbabilisticRandomGen generator = new WeightedRandomGenerator(distribution);
-  int sample = generator.nextFromSample();
-  ```
-
-- **Deterministic sampling for tests**
-  ```java
-  Random fixedSeed = new Random(12345L);
-  ProbabilisticRandomGen generator = new WeightedRandomGenerator(distribution, fixedSeed);
-  ```
 
 ## API Reference
 
@@ -137,28 +117,6 @@ If multiple threads will publish or subscribe concurrently, prefer `ThreadSafeEv
 - **Dead-event optionality:** emits `DeadEvent` when no subscribers handle an event (configurable via constructor).
 - **Lightweight metrics:** tracks total published events and dead-event count for diagnostics.
 
-#### Quick Start
-```java
-ThreadUnsafeEventBus eventBus = new ThreadUnsafeEventBus();
-
-record OrderCreated(String orderId) {}
-record InventoryAdjusted(String sku, int delta) {}
-
-Subscription orderSub = eventBus.addSubscriber(OrderCreated.class, event -> {
-    System.out.println("Processing order " + event.orderId());
-});
-
-// All calls must occur on the same thread
-eventBus.publishEvent(new OrderCreated("ORD-123"));
-
-// Unsubscribe when finished
-orderSub.unsubscribe();
-
-eventBus.close();
-```
-
-Keep interactions confined to a single thread and `ThreadUnsafeEventBus` delivers minimal-overhead event routing with familiar APIs.
-
 
 ### ThreadSafeEventBus
 
@@ -170,27 +128,6 @@ Designed for concurrent environments, `ThreadSafeEventBus` uses `ConcurrentHashM
 - **Non-blocking collections:** `ConcurrentHashMap` registry with `CopyOnWriteArrayList` per event type.
 - **Atomic metrics:** publish counts and dead-event totals tracked with `AtomicLong`.
 - **Hierarchy-aware dispatch:** subscribers registered for supertypes/interfaces still receive subclass events.
-
-#### Quick Start
-```java
-ThreadSafeEventBus eventBus = new ThreadSafeEventBus();
-
-record PriceTick(String symbol, double price) {}
-
-eventBus.addSubscriber(PriceTick.class, tick -> {
-    System.out.println(Thread.currentThread().getName() + " received " + tick);
-});
-
-ExecutorService pool = Executors.newFixedThreadPool(4);
-for (int i = 0; i < 10; i++) {
-    pool.submit(() -> eventBus.publishEvent(new PriceTick("AAPL", Math.random() * 200)));
-}
-
-pool.shutdown();
-eventBus.close();
-```
-
-Use `ThreadSafeEventBus` whenever concurrency is a requirement; it provides safe, predictable event delivery without manual locking.
 
 
 ### CoalescingThreadSafeEventBus
@@ -205,35 +142,13 @@ Extends the thread-safe core with event coalescing, ensuring subscribers only se
 - **Detailed metrics:** exposes counts for coalesced, replaced, and pending events.
 - **Async-friendly:** optional `ScheduledExecutorService` batches deliveries in background threads.
 
-### Quick Start
-```java
-CoalescingThreadSafeEventBus eventBus = new CoalescingThreadSafeEventBus();
-
-record Quote(String symbol, double price, long sequence) {}
-
-eventBus.addCoalescingSubscriber(
-    Quote.class,
-    quote -> quote.symbol(),
-    quote -> System.out.println("Latest quote for " + quote.symbol() + " = " + quote.price())
-);
-
-// Rapid updates collapse to the latest per symbol
-eventBus.publishEvent(new Quote("AAPL", 190.10, 101));
-eventBus.publishEvent(new Quote("AAPL", 190.15, 102));
-
-eventBus.flushCoalescedEvents();
-eventBus.close();
-```
-
-Select `CoalescingThreadSafeEventBus` when you need thread safety plus intelligent conflation to keep subscribers focused on the latest state.
-
 
 # C. Sliding Window Throttler
 
 📚 **[API Documentation](https://tguinot.github.io/hs/throttler/com/hsbc/throttler/package-summary.html)**
 
 ## Overview
-`SlidingWindowThrottler` is a production-quality rate limiter that enforces a maximum number of permits inside a moving time window. The implementation lives in `throttler/src/main/java/com/hsbc/throttler/SlidingWindowThrottler.java` and implements the `Throttler` contract.
+`SlidingWindowThrottler` is a rate limiter that enforces a maximum number of permits inside a moving time window. The implementation lives in `throttler/src/main/java/com/hsbc/throttler/SlidingWindowThrottler.java` and implements the `Throttler` contract.
 
 ## Highlights
 - **Sliding window enforcement**: Maintains recent timestamps and evicts expired entries before each decision.
@@ -253,18 +168,7 @@ open throttler/target/site/jacoco/index.html
 
 ## Usage
 
-### Synchronous throttling ([`Example.java`](throttler/src/main/java/com/hsbc/throttler/examples/Example.java))
-```java
-SlidingWindowThrottler throttler = new SlidingWindowThrottler(5, Duration.ofSeconds(1));
-
-if (throttler.shouldProceed() == ThrottleResult.PROCEED) {
-    callDownstreamService();
-} else {
-    throttler.notifyWhenCanProceed(() -> callDownstreamService());
-}
-
-throttler.shutdown();
-```
+See [`Example.java`](throttler/src/main/java/com/hsbc/throttler/examples/Example.java) for runnable samples.
 
 ### Configuration notes
 - **Default executors**: The no-arg constructor provisions daemon scheduler and callback executors.
@@ -302,24 +206,3 @@ open window/target/site/jacoco/index.html
 ## Usage
 
 See [`Example.java`](window/src/main/java/com/hsbc/window/examples/Example.java) for an end-to-end statistics demo.
-
-```java
-try (SlidingWindowStatistics stats = new SlidingWindowStatisticsImpl(100)) {
-    stats.subscribeForStatistics(new StatisticsSubscriber() {
-        @Override
-        public boolean shouldNotify(Statistics snapshot) {
-        }
-
-        @Override
-        public void onStatisticsUpdate(Statistics snapshot) {
-            System.out.println("P95 latency = " + snapshot.getPctile(95));
-        }
-    });
-
-    for (long latency : latencies) {
-        stats.add(latency);
-    }
-
-    Statistics latest = stats.getLatestStatistics();
-    System.out.println("Mean latency = " + latest.getMean());
-}

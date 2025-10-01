@@ -35,18 +35,21 @@ import java.util.Comparator;
  * <p>Example usage:
  * <pre>{@code
  * CoalescingThreadSafeEventBus eventBus = new CoalescingThreadSafeEventBus();
- * 
+ *
  * // Configure global coalescing for market data
  * eventBus.configureCoalescing(
  *     MarketDataUpdate.class,
  *     update -> update.getSymbol()
- * 
+ * );
+ *
  * // Or use per-subscriber coalescing
  * eventBus.addCoalescingSubscriber(
  *     OrderUpdate.class,
  *     order -> order.getOrderId(),
  *     order -> processOrder(order)
  * );
+ * }
+ * </pre>
  * @see AbstractEventBus
  * @see ThreadSafeEventBus
  */

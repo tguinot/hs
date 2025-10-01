@@ -28,6 +28,12 @@ Robust Java library for sampling integers from deterministic probability distrib
   mvn -pl probabilistic-random-gen exec:java
   ```
 
+- **Generate coverage report**
+  ```bash
+  mvn -pl probabilistic-random-gen verify
+  open probabilistic-random-gen/target/site/jacoco/index.html
+  ```
+
 ## Usage
 
 - **Create a generator**
@@ -104,6 +110,11 @@ The module provides three in-process EventBus implementations covering single-th
 ## Getting Started
 ```bash
 mvn -pl event-bus exec:java
+```
+
+```bash
+mvn -pl event-bus verify
+open event-bus/target/site/jacoco/index.html
 ```
 
 ## Usage
@@ -266,6 +277,11 @@ Select `CoalescingThreadSafeEventBus` when you need thread safety plus intellige
 mvn -pl throttler exec:java
 ```
 
+```bash
+mvn -pl throttler verify
+open throttler/target/site/jacoco/index.html
+```
+
 ## Usage
 
 ### Synchronous throttling
@@ -308,6 +324,11 @@ throttler.shutdown();
 ## Getting Started
 ```bash
 mvn -pl window exec:java
+```
+
+```bash
+mvn -pl window verify
+open window/target/site/jacoco/index.html
 ```
 
 ## Usage

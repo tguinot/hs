@@ -36,6 +36,8 @@ Robust Java library for sampling integers from deterministic probability distrib
 
 ## Usage
 
+See [`Example.java`](probabilistic-random-gen/src/main/java/com/hsbc/random/examples/Example.java) for runnable samples.
+
 - **Create a generator**
   ```java
   List<ProbabilisticRandomGen.NumAndProbability> distribution = List.of(
@@ -89,7 +91,7 @@ Robust Java library for sampling integers from deterministic probability distrib
   - Performance guard ensures constructing 1000-entry distributions completes <1s and sampling 10k values <100ms.
 - **Data-class tests**: `NumAndProbabilityTest` confirms validation, equality, hashCode, and `toString()` formatting.
 
-## Examples Overview (`src/main/java/com/hsbc/random/Example.java`)
+## Examples Overview ([`Example.java`](probabilistic-random-gen/src/main/java/com/hsbc/random/examples/Example.java))
 
 - **Simple weighted sampling**: 10 draws from a 3-value distribution.
 - **Dice simulation**: Fair six-sided die rolled 20 times with seeded randomness.
@@ -119,7 +121,9 @@ open event-bus/target/site/jacoco/index.html
 
 ## Usage
 
-### ThreadUnsafeEventBus
+See [`Example.java`](event-bus/src/main/java/com/hsbc/eventbus/examples/Example.java) for runnable samples.
+
+### ThreadUnsafeEventBus ([`Example.java`](event-bus/src/main/java/com/hsbc/eventbus/examples/Example.java))
 
 A lightweight option optimized for single-threaded scenarios. `ThreadUnsafeEventBus` trades synchronization for throughput by using basic collections (`HashMap`, `ArrayList`). Only one thread should interact with the bus at a time or you must guard access externally.
 
@@ -284,7 +288,7 @@ open throttler/target/site/jacoco/index.html
 
 ## Usage
 
-### Synchronous throttling
+### Synchronous throttling ([`Example.java`](throttler/src/main/java/com/hsbc/throttler/examples/Example.java))
 ```java
 SlidingWindowThrottler throttler = new SlidingWindowThrottler(5, Duration.ofSeconds(1));
 
@@ -332,12 +336,14 @@ open window/target/site/jacoco/index.html
 ```
 
 ## Usage
+
+See [`Example.java`](window/src/main/java/com/hsbc/window/examples/Example.java) for an end-to-end statistics demo.
+
 ```java
 try (SlidingWindowStatistics stats = new SlidingWindowStatisticsImpl(100)) {
     stats.subscribeForStatistics(new StatisticsSubscriber() {
         @Override
         public boolean shouldNotify(Statistics snapshot) {
-            return snapshot.getSize() == 100;
         }
 
         @Override

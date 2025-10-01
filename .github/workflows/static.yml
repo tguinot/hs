@@ -32,7 +32,7 @@ jobs:
 
       - name: Generate module Javadocs
         run: |
-          mvn -B -pl probabilistic-random-gen,event-bus,throttler,window javadoc:javadoc
+          mvn -B -pl probabilistic-random-gen,event-bus,throttler,window site
 
       - name: Assemble Pages artifact
         run: |

@@ -36,16 +36,6 @@ Java library for sampling integers from deterministic probability distributions.
 
 See [`Example.java`](probabilistic-random-gen/src/main/java/com/hsbc/random/examples/Example.java) for runnable samples.
 
-## API Reference
-
-- **`ProbabilisticRandomGen`** (`src/main/java/com/hsbc/random/ProbabilisticRandomGen.java`)
-  - `int nextFromSample()`
-  - Nested `NumAndProbability` with validated constructor, `getNumber()`, `getProbabilityOfSample()`, `equals()/hashCode()/toString()`
-
-- **`WeightedRandomGenerator`** (`src/main/java/com/hsbc/random/WeightedRandomGenerator.java`)
-  - Constructors accepting a distribution and optional `Random`
-  - Filters out zero-probability entries and normalises cumulative array to `1.0f`
-  - Defensive copies via `getNumbers()` and `getCumulativeProbabilities()`
 
 ## Implementation Notes
 
@@ -62,21 +52,6 @@ See [`Example.java`](probabilistic-random-gen/src/main/java/com/hsbc/random/exam
 - **Threading**
   - `NumAndProbability` is immutable.
   - `WeightedRandomGenerator` uses a mutable `Random`; prefer per-thread instances or external synchronisation when sharing.
-
-## Quality & Testing
-
-- **Coverage focus** (`src/test/java/com/hsbc/random/WeightedRandomGeneratorTest.java`)
-  - Parameterised checks for invalid sums, rounding tolerance, tiny probabilities, and complex distributions sampled 50k+ times with dynamic tolerances.
-  - Deterministic custom `Random` subclasses verify boundary values (`0.0`, `0.25`, `0.99999`).
-  - Performance guard ensures constructing 1000-entry distributions completes <1s and sampling 10k values <100ms.
-- **Data-class tests**: `NumAndProbabilityTest` confirms validation, equality, hashCode, and `toString()` formatting.
-
-## Examples Overview ([`Example.java`](probabilistic-random-gen/src/main/java/com/hsbc/random/examples/Example.java))
-
-- **Simple weighted sampling**: 10 draws from a 3-value distribution.
-- **Dice simulation**: Fair six-sided die rolled 20 times with seeded randomness.
-- **Statistical validation**: 100,000 samples summarised with actual vs expected percentages.
-
 
 
 # B. Event Bus
@@ -175,10 +150,6 @@ See [`Example.java`](throttler/src/main/java/com/hsbc/throttler/examples/Example
 - **Custom executors**: Supply your own scheduler/executor pair to integrate with container-managed pools or to bound concurrency.
 - **Deterministic testing**: Inject a fixed `Clock` to simulate time progression without sleeps.
 
-### API reference
-- `shouldProceed()` cleans up timestamps, attempts to consume a permit, and returns `ThrottleResult`.
-- `notifyWhenCanProceed(Runnable)` queues callbacks and schedules `checkAndNotifyWaiters()` when capacity returns.
-- `shutdown()` cancels scheduled tasks and closes owned executors.
 
 # D. Sliding Window Statistics
 

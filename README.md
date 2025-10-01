@@ -1,6 +1,8 @@
 
 # A. Probabilistic Random Generator
 
+📚 **[API Documentation](https://tguinot.github.io/hs/probabilistic-random-gen/com/hsbc/random/package-summary.html)**
+
 ## Overview
 Robust Java library for sampling integers from deterministic probability distributions. Built with Maven, tested with JUnit 5 and AssertJ, and exercised through a rich example suite.
 
@@ -98,6 +100,8 @@ See [`Example.java`](probabilistic-random-gen/src/main/java/com/hsbc/random/exam
 
 
 # B. Event Bus
+
+📚 **[API Documentation](https://tguinot.github.io/hs/event-bus/com/hsbc/eventbus/package-summary.html)**
 
 ## Overview
 The module provides three in-process EventBus implementations covering single-threaded, multi-threaded, and coalescing workloads.
@@ -226,6 +230,8 @@ Select `CoalescingThreadSafeEventBus` when you need thread safety plus intellige
 
 # C. Sliding Window Throttler
 
+📚 **[API Documentation](https://tguinot.github.io/hs/throttler/com/hsbc/throttler/package-summary.html)**
+
 ## Overview
 `SlidingWindowThrottler` is a production-quality rate limiter that enforces a maximum number of permits inside a moving time window. The implementation lives in `throttler/src/main/java/com/hsbc/throttler/SlidingWindowThrottler.java` and implements the `Throttler` contract.
 
@@ -271,6 +277,8 @@ throttler.shutdown();
 - `shutdown()` cancels scheduled tasks and closes owned executors.
 
 # D. Sliding Window Statistics
+
+📚 **[API Documentation](https://tguinot.github.io/hs/window/com/hsbc/window/package-summary.html)**
 
 ## Overview
 `SlidingWindowStatisticsImpl` maintains a fixed-size FIFO of recent measurements and provides descriptive analytics via the `SlidingWindowStatistics` API.
